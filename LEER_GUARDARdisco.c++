@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <chrono>
+
 const char* FILENAME = "datos.bin";
 
 struct ContadorEscritura_Lectura{
