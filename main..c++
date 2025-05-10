@@ -56,7 +56,7 @@ int main() {
 
             // Guardar en disco, y tiempo total. 
             auto t1 = std::chrono::high_resolution_clock::now();
-            guardarEnDisco(reinterpret_cast<int*>(arreglo), N, B);  // se escribe en "datos.bin"
+            guardarEnDisco((arreglo), N, B);  // se escribe en "datos.bin"
             auto t2 = std::chrono::high_resolution_clock::now();
             std::cout << "Escritura(Guardar en disco) Tiempo: " << std::chrono::duration<double>(t2 - t1).count() << " s\n";
 
