@@ -30,3 +30,6 @@ recuerde usar otros nombres o borrar los archivos, pues, si existen nombres igua
 
 Ante cualquier duda, contactar en ucursos.
 Saludos Cordiales.
+
+posdata:
+El csv adjunto fue generado por el código, por ende, la generación de este, fue la de su ultimo uso, no la del informe, es el mismo codigo, pero pusheado en el github
