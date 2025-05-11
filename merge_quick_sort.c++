@@ -16,44 +16,31 @@ struct ContadorEscritura_Lectura {
   int contadorEscritura = 0;
   int contadorLectura = 0;
 } contadorEscritura_Lectura;
-
 void leerDesdeDisco(int64_t* arreglo, int64_t N, int64_t B, int64_t i = 0) {
-    // modo leer binario
     FILE* archivo = fopen(FILENAME, "rb");
     if (!archivo) {
         perror("Error abriendo archivo");
         exit(1);
     }
 
-    // si escogemos un indice fuera de rango 
-    if (i < 0 || i >= N) {
-        fprintf(stderr, "Error: el índice inicial i=%ld está fuera de rango (0 <= i < %ld)\n", i, N);
-        fclose(archivo);
-        return;
-    }
-
-    // tamaño del bloque en bytes
     int64_t elementosPorBloque = B / sizeof(int64_t);
-    // buffer aux, para poder poder escribir bloque por bloque, es  = B pues ints * sizeint = B
     int64_t* buffer = new int64_t[elementosPorBloque];
 
     for (; i < N; i += elementosPorBloque) {
+        int64_t cantidad = std::min(elementosPorBloque, N - i);
         int64_t offsetBytes = i * sizeof(int64_t);
+        if (fseek(archivo, offsetBytes, SEEK_SET) != 0) {
+            perror("fseek error");
+            exit(1);
+        }
 
-        fseek(archivo, offsetBytes, SEEK_SET);
-
-        // size_t fwrite(const void* ptr, size_t size, size_t count, FILE* stream);
-
-        int64_t cantidad = (i + elementosPorBloque <= N) ? elementosPorBloque : N - i;
-
-        size_t leidos = fread(buffer, sizeof(int64_t), elementosPorBloque, archivo);
-        if (leidos != elementosPorBloque) {
+        size_t leidos = fread(buffer, sizeof(int64_t), cantidad, archivo);
+        if (leidos != cantidad) {
             perror("Error al leer del archivo");
             exit(1);
         }
-        memcpy(&arreglo[i], buffer, cantidad * sizeof(int64_t));
 
-        // contador de lectura, la estructura definida anteriormente
+        memcpy(&arreglo[i], buffer, cantidad * sizeof(int64_t));
         contadorEscritura_Lectura.contadorLectura++;
     }
 
@@ -62,65 +49,35 @@ void leerDesdeDisco(int64_t* arreglo, int64_t N, int64_t B, int64_t i = 0) {
 }
 
 void guardarEnDisco(int64_t* arreglo, int64_t N, int64_t B, int64_t i = 0) {
-    // modo escribir binario
     FILE* archivo = fopen(FILENAME, "wb");
     if (!archivo) {
         perror("Error abriendo archivo");
         exit(1);
     }
-    // si escogemos un indice fuera de rango 
-    if (i < 0 || i >= N) {
-        fprintf(stderr, "Error: el índice inicial i=%ld está fuera de rango (0 <= i < %ld)\n", i, N);
-        fclose(archivo);
-        return;
-    }
 
-    //int64_t tamañoEntero = sizeof(int64_t);
-    // tamaño del bloque en bytes
     int64_t elementosPorBloque = B / sizeof(int64_t);
-
-    // buffer aux, para poder poder escribir bloque por bloque, es  = B pues ints * sizeint = B
     int64_t* buffer = new int64_t[elementosPorBloque];
 
     while (i < N) {
-        // si cabe todo el bloque
-        int64_t elementosPorCopiar = 0;
-        if ((i + elementosPorBloque <= N)) {
-            elementosPorCopiar = elementosPorBloque;
-        }
-        // los restantes (N-i))
-        else {
-            elementosPorCopiar = N - i;
-        }
+        int64_t elementosPorCopiar = std::min(elementosPorBloque, N - i);
 
-        // memcy = mem = memory cpy = copiar en memoria el buffer(bloque) usando el arreglo 
-        // void* memcpy(void* dest, const void* src, size_t n);
-        // destination: puntero donde queremos guardar
-        // source: puntero a la memo donde queremos guardar
-        // num: The number of bytes to copy. elementos * size = bytes
+        // copiar sólo lo que toque, sin padding
         memcpy(buffer, &arreglo[i], elementosPorCopiar * sizeof(int64_t));
 
-        // verifica que no se llenó
-        if (elementosPorCopiar < elementosPorBloque) {
-            // desde el indice que queda por copiar
-            memset(&buffer[elementosPorCopiar], 0,
-                   (elementosPorBloque - elementosPorCopiar) * sizeof(int64_t));
+        int64_t offsetBytes = i * sizeof(int64_t);
+        if (fseek(archivo, offsetBytes, SEEK_SET) != 0) {
+            perror("fseek error");
+            exit(1);
         }
 
-        // fseek = mover el puntero del archivo
-        // SEEK_SET: desde el inicio del archivo
-        // i * sizeof(int): posición en bytes donde escribir
-        fseek(archivo, i * sizeof(int64_t), SEEK_SET);
+        size_t escritos = fwrite(buffer, sizeof(int64_t), elementosPorCopiar, archivo);
+        if (escritos != elementosPorCopiar) {
+            perror("Error al escribir en el archivo");
+            exit(1);
+        }
 
-        // fwrite = write file = escribir en el archivo
-        // void fwrite(const void* ptr, size_t size, size_t count, FILE* stream);
-        fwrite(buffer, sizeof(int64_t), elementosPorBloque, archivo);
-
-        // contador de escritura, la estructura definida anteriormente
         contadorEscritura_Lectura.contadorEscritura++;
-
-        // saltos de elementosPorBloque
-        i += elementosPorBloque;
+        i += elementosPorCopiar;
     }
 
     delete[] buffer;
@@ -518,6 +475,12 @@ void MergeSort() {
   // Determinar la mejor aridad
   int mejorAridad = encontrarMejorAridad(arreglo, N, B, M);
 
+  // imprimir mejor aridad usada
+  // printear la mejor aridad 
+  std::cout << "Mejor aridad encontrada: " << mejorAridad << std::endl;
+
+
+
   // Re-escribir los datos
   guardarEnDisco(arreglo, N, B);
 
@@ -547,47 +510,3 @@ void QuickSort() {
 }
 
 
-int aridad_optima_mergeSort =
-    -1; // aridad optima para los ordenamientos (a) valor global.
-//  mejor aridad 𝑎 de Mergesort externo
-
-int main() {
-    const int64_t N = 64;                   // pequeño número de elementos (64 enteros de 64 bits)
-    const int B = 64;                       // bloque de 64 bytes (8 enteros de 64 bits)
-    //const int64_t tamañoEntero = sizeof(int64_t);
-
-    std::mt19937_64 rng(std::random_device{}());
-
-    int64_t arreglo[N];
-    for (int64_t i = 0; i < N; ++i) arreglo[i] = i;
-    std::shuffle(arreglo, arreglo + N, rng);
-
-    // Escritura a disco
-    auto t1 = std::chrono::high_resolution_clock::now();
-    guardarEnDisco(arreglo, N, B);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::cout << "Escritura a disco completada en "
-              << std::chrono::duration<double>(t2 - t1).count() << " segundos.\n";
-
-    // MergeSort externo simulado
-    contadorEscritura_Lectura.contadorLectura = 0;
-    contadorEscritura_Lectura.contadorEscritura = 0;
-    auto t3 = std::chrono::high_resolution_clock::now();
-    MergeSort();
-    auto t4 = std::chrono::high_resolution_clock::now();
-    std::cout << "[Merge] Tiempo: "
-              << std::chrono::duration<double>(t4 - t3).count()
-              << " s | Lecturas: " << contadorEscritura_Lectura.contadorLectura << "\n";
-
-    // QuickSort externo simulado
-    contadorEscritura_Lectura.contadorLectura = 0;
-    contadorEscritura_Lectura.contadorEscritura = 0;
-    auto t5 = std::chrono::high_resolution_clock::now();
-    QuickSort();
-    auto t6 = std::chrono::high_resolution_clock::now();
-    std::cout << "[Quick] Tiempo: "
-              << std::chrono::duration<double>(t6 - t5).count()
-              << " s | Lecturas: " << contadorEscritura_Lectura.contadorLectura << "\n";
-
-    return 0;
-}

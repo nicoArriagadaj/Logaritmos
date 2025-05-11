@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <cstdint>
-#include "LEER_GUARDARdisco.c++"  
+#include "CHRISTIAN_CODIGO.c++"  
 
 // implementaciones de ordenamiento que tendremos
 void MergeSort();

@@ -1,0 +1,3 @@
+Tamaño_MB,Secuencia,Algoritmo,Tiempo_segundos,Accesos_disco
+4,1,Merge,0.192744,2
+4,1,Quick,0.0169955,1
