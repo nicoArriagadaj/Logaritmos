@@ -5,6 +5,7 @@
 
 2) ejecutar ./main
 
+Recuerde no usar el mismo main para compilar, puede fallar
 
 ### Ejecución dentro de Docker (límite de 50 MB de RAM), debes:
 
