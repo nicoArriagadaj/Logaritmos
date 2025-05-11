@@ -1,7 +1,7 @@
 # DISEÑO Y ANALISIS DE ALGORITMOS
 
 ### para correr el codigo normalmente, debes
-1) compilar g++ main.cpp -o main
+1) compilar g++ main.c++ -o main
 
 2) ejecutar ./main
 
