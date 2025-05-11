@@ -1,10 +1,6 @@
 {
     "files.associations": {
         "*.dbclient-js": "javascript",
-        "*.sqlbook": "sql",
-        "*.ndjson": "jsonl",
-        "stdlib.h": "c",
-        "cstdint": "cpp",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -16,6 +12,7 @@
         "compare": "cpp",
         "concepts": "cpp",
         "cstddef": "cpp",
+        "cstdint": "cpp",
         "cstdio": "cpp",
         "cstdlib": "cpp",
         "cstring": "cpp",
@@ -42,6 +39,7 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "format": "cpp",
+        "fstream": "cpp",
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "iosfwd": "cpp",
@@ -57,8 +55,6 @@
         "streambuf": "cpp",
         "text_encoding": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp",
-        "christian_codigo": "cpp",
-        "fstream": "cpp"
+        "variant": "cpp"
     }
 }
